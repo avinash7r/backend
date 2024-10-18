@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     mail: {
       type: String,
       required: true,
+      unique: true, //still unable to insert only unique mail
     },
     password: {
       type: String,
