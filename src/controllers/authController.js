@@ -1,18 +1,25 @@
 import mongoose from "mongoose";
+import { checkPassword } from "../utils/hash.js";
 import users from "../modules/users.js";
 
 export const userLogin = async (req, res) => {
-  const user = req.body;
-  if (!user.mail || !user.password) {
+  const { mail, password } = req.body;
+  if (!mail || !password) {
     return res
       .status(404)
       .json({ message: "please provide mail and password" });
   }
   try {
-    const curUser = await users.findOne({ mail: user.mail });
-    if (curUser.password === user.password) {
+    const curUser = await users.findOne({ mail: mail });
+    if (!curUser) {
+      return res
+        .status(404)
+        .json({ message: "please provide mail and password" });
+    }
+    const match = await checkPassword(password, curUser.password);
+    if (match) {
       res
-        .status(200)
+        .status(201)
         .json({ success: true, message: "you just logged in", data: curUser });
     } else {
       return res
