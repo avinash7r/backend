@@ -8,6 +8,12 @@ export const createUser = async (req, res) => {
     return console.log("please provide all the fields");
   }
   try {
+    const tem = await users.findOne({ mail });
+    if (tem) {
+      return res
+        .status(400)
+        .json({ message: "user already exists with provided mail" });
+    }
     const hashPassword = await genHash(password);
     const newUser = new users({
       name,
