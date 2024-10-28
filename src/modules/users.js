@@ -21,6 +21,8 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.index({ mail: 1 }, { unique: true });
+
 const users = mongoose.model("users", userSchema);
 
 export default users;
