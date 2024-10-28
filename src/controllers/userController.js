@@ -54,3 +54,61 @@ export const deleteUser = async (req, res) => {
     return res.status(500).json({ message: "internal error", error });
   }
 };
+
+export const getUser = async (req, res) => {
+  const { mail, password } = req.body;
+  if (!mail || !password) {
+    res
+      .status(400)
+      .json({ success: false, message: "please provide mail and password" });
+  }
+  try {
+    const curUser = await users.findOne({ mail });
+    if (!curUser) {
+      res
+        .status(404)
+        .json({ success: false, message: `no user for th mail ${mail}` });
+    }
+    const match = await checkPassword(password, curUser.password);
+    if (match) {
+      res.status(200).json({ success: true, curUser });
+    } else {
+      res
+        .status(401)
+        .json({ success: false, message: "plz check mail and password" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "internal error" });
+  }
+};
+
+export const updatePass = async (req, res) => {
+  const { mail, password, newPassword } = req.body;
+  if (!mail || !password) {
+    res
+      .status(400)
+      .json({ success: false, message: "please provide mail and password" });
+  }
+  try {
+    const curUser = await users.findOne({ mail });
+    if (!curUser) {
+      res
+        .status(404)
+        .json({ success: false, message: `no user for th mail ${mail}` });
+    }
+    const match = await checkPassword(password, curUser.password);
+    if (match) {
+      const hashPassword = await genHash(newPassword);
+      await users.updateOne({ password: hashPassword });
+      res.status(200).json({ success: true, message: "password changed" });
+    } else {
+      res
+        .status(401)
+        .json({ success: false, message: "plz check mail and password" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "internal error" });
+  }
+};
